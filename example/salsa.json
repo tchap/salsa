@@ -1,0 +1,20 @@
+{
+  "storeURL": "https://artifacts.example.com",
+  "projectSecrets": {
+    "foobar": "DZGscqnCP2NFkl7DnE3f",
+    "depA":   "2MMly8RfTF10m7iQGCOB",
+    "depB":   "am998wil8TVeL12ICRJA"
+  },
+  "commands": {
+    "publish": {
+      "build/x86": {
+        "tag":      "x86",
+        "archiver": "tar"
+      },
+      "build/x64": {
+        "tag":      "x64",
+        "archiver": "zip",
+      }
+    }
+  }
+}
