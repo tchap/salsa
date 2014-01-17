@@ -110,6 +110,7 @@ func bootstrap() {
 				if !os.IsNotExist(err) {
 					log.Fatalf("Error: failed to stat %v: %v", rcPath, err)
 				}
+				continue
 			}
 			if perm := info.Mode() & os.ModePerm & 0007; perm != 0 {
 				log.Fatalf("Error: %v violates the permissions constraints", rcPath)
