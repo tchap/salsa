@@ -89,11 +89,12 @@ func bootstrap() {
 	}
 
 	var userConfig string
-	if config := os.Getenv("SALSARC"); config != "" {
+	if config := os.Getenv("SALSA_RC"); config != "" {
 		userConfig = config
 	} else {
 		userConfig = filepath.Join(user.HomeDir, SalsaRCFile)
 	}
+	checkPermissions := os.Getenv("SALSA_SKIP_PERMISSIONS_CHECK") == ""
 	rcFiles := []string{
 		userConfig,
 		SalsaRCFile,
@@ -103,7 +104,7 @@ func bootstrap() {
 			fmt.Printf("Reading %v ...\n", rcPath)
 		}
 
-		if rcPath != SalsaRCFile {
+		if checkPermissions && rcPath != SalsaRCFile {
 			info, err := os.Stat(rcPath)
 			if err != nil {
 				if !os.IsNotExist(err) {
