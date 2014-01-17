@@ -88,8 +88,14 @@ func bootstrap() {
 		log.Fatalf("Error: failed to get the current user: %v", err)
 	}
 
+	var userConfig string
+	if config := os.Getenv("SALSARC"); config != "" {
+		userConfig = config
+	} else {
+		userConfig = filepath.Join(user.HomeDir, SalsaRCFile)
+	}
 	rcFiles := []string{
-		filepath.Join(user.HomeDir, SalsaRCFile),
+		userConfig,
 		SalsaRCFile,
 	}
 	for _, rcPath := range rcFiles {
