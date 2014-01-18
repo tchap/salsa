@@ -77,7 +77,7 @@ USAGE:
   publish [-tag TAG] [-archiver {tar|zip}] ARTIFACTS_DIR
 
 OPTIONS:
-  -archiver="tar": archiver to use for packing of the artifacts
+  -archiver="tar": archiver to use for packing the artifacts
   -h=false: print help and exit
   -tag="": tag to use in the archive file name
 
@@ -98,7 +98,7 @@ DESCRIPTION:
     * .salsarc can contain a project-specific artifacts store as "storeURL"
     * the user-specific .salsarc can contain "storeURL" as well as the HTTP
       Basic authentication credentials as "username" and "password".
-      Project URL secrets are also store there under "secrets.$project"
+      Project URL secrets are also stored there under "secrets.$project"
 
 ENVIRONMENTAL VARIABLES:
   BRANCH       - if set, $BRANCH is used in the archive filename as $branch
@@ -110,7 +110,7 @@ ENVIRONMENTAL VARIABLES:
 
 Check the `example` directory for a life demo.
 
-## TODO:
+## TODO
 
 * Handle interrupts.
 

@@ -61,7 +61,7 @@ ENVIRONMENTAL VARIABLES:
 	publish.Flags.StringVar(&publishTag, "tag", publishTag,
 		"tag to use in the archive file name")
 	publish.Flags.StringVar(&publishArchiver, "archiver", publishArchiver,
-		"archiver to use for packing of the artifacts")
+		"archiver to use for packing the artifacts")
 
 	getApp().MustRegisterSubcommand(publish)
 }
