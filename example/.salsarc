@@ -1,0 +1,10 @@
+{
+  "storeURL": "https://artifacts.example.com",
+  "username": "jenik.krepelka",
+  "password": "thisissosecret",
+  "secrets": {
+    "foobar": "DZGscqnCP2NFkl7DnE3f",
+    "depA":   "2MMly8RfTF10m7iQGCOB",
+    "depB":   "am998wil8TVeL12ICRJA"
+  }
+}
