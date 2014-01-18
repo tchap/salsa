@@ -33,12 +33,27 @@ func init() {
   publish [-tag TAG] [-archiver {tar|zip}] ARTIFACTS_DIR`,
 		Short: "publish build artifacts",
 		Long: `
-  This subcommand collects all artifacts in ARTIFACTS_DIR, packs them up using
-  the chosen archiver and uploads the archive to the artifacts store.
+  publish uses ARTIFACTS_DIR as the root directory for the archive that it
+  creates and uploads to the server.
+
+  publish goes through the following steps:
+    1. read package.json in the current working directory (mandatory),
+    2. read .salsarc in the current working directory (optional),
+    3. read the user-specific salsa config file (mandatory),
+    4. create the archive from ARTIFACTS_DIR using the selected archiver,
+    5. PUT the archive to $storeURL/$project-$secret/$branch/$archive where
+       archive=$project-$tag-$branch-$version.$archiver
+
+  All the configuration files are JSON files containing relevant keys:
+    * package.json is the NPM package.json, salsa uses "name" and "version"
+    * .salsarc can contain a project-specific artifacts store as "storeURL"
+    * the user-specific .salsarc can contain "storeURL" as well as the HTTP
+      Basic authentication credentials as "username" and "password".
+      Project URL secrets are also store there under "secrets.$project"
 
 ENVIRONMENTAL VARIABLES:
-  BRANCH       - if set, the branch name is used in the archive name, somehow
-  BUILD_NUMBER - if set, the version is set to <version>.${BUILD_NUM}
+  BRANCH       - if set, $BRANCH is used in the archive filename as $branch
+  BUILD_NUMBER - if set, $version is set to $version.$BUILD_NUMBER
 		`,
 		Action: runPublish,
 	}

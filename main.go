@@ -165,13 +165,18 @@ func getApp() *gocli.App {
 	app.Short = "a project build artifacts manager"
 	app.Version = "0.0.1"
 	app.Long = `
-  Salsa can be used to upload or download project build artifacts to or from
-  a remote HTTP server using HTTP GET/PUT respectively.
+  Salsa is a project build artifacts manager that can publish or fetch build
+  artifacts. A remote HTTP server acts as the artifacts store and salsa uses
+  HTTP PUT and GET requests to publish and fetch the artifacts respectively.
+  See the subcommands for more details.
 
-  Salsa can also use Basic auth to authenticate HTTP requests. If you, however,
-  do not want to use your username and password in CLI, create .salsarc in your
-  home directory. It shall be a json file containing "username" and "password".
-  If this file is found, salsa will read the credentials from there.`
+  Salsa can be set up to use Basic authentication to authenticate HTTP requests.
+  If you, however, do not want to specify the credentials on the command line,
+  $HOME/.salsarc can be used to set them for you.
+
+ENVIRONMENTAL VARIABLES:
+  SALSA_USER_CONFIG - overwrites the default location for the user-specific
+                      configuration file, which is $HOME/.salsarc`
 	app.Flags.BoolVar(&config.Flags.Verbose, "v", config.Flags.Verbose,
 		"print verbose output")
 	app.Flags.BoolVar(&config.Flags.Dry, "dry", config.Flags.Dry,
