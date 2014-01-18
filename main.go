@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	SalsaRCFile = ".salsarc"
-	PackageFile = "package.json"
+	ConfigFilename = ".salsarc"
+	PackageFile    = "package.json"
 
 	VersionPattern = "^[0-9]+[.][0-9]+[.][0-9]+$"
 )
@@ -69,7 +69,7 @@ func (config *Config) Password() string {
 var config = new(Config)
 
 func bootstrap() {
-	// Load package.json first.
+	// Part I: Load package.json first.
 	if config.Verbose() {
 		fmt.Printf("Reading %v ...\n", PackageFile)
 	}
@@ -82,51 +82,46 @@ func bootstrap() {
 		log.Fatalf("Error: failed to unmarshal %v: %v", PackageFile, err)
 	}
 
-	// Update the config in cascade, $HOME/.salsarc -> $PWD/.salsarc
+	// Part II: Update config in cascade from $HOME/.salsarc, then $PWD/.salsarc
 	user, err := user.Current()
 	if err != nil {
 		log.Fatalf("Error: failed to get the current user: %v", err)
 	}
 
-	var userConfig string
-	if config := os.Getenv("SALSA_RC"); config != "" {
-		userConfig = config
+	userConfig := os.Getenv("SALSA_USER_CONFIG")
+	if userConfig == "" {
+		userConfig = filepath.Join(user.HomeDir, ConfigFilename)
+	}
+
+	// Print warning if the user-specific config file is accessible by other
+	// users. Its mode should be set to 0600 since it can containt credentials.
+	if info, err := os.Stat(userConfig); err == nil {
+		if perm := info.Mode() & os.ModePerm & 0077; perm != 0 {
+			fmt.Println("WARNING: %v is accessible by other users")
+		}
 	} else {
-		userConfig = filepath.Join(user.HomeDir, SalsaRCFile)
+		if !os.IsNotExist(err) {
+			log.Fatalf("Error: failed to stat %v: %v", userConfig, err)
+		}
 	}
-	checkPermissions := os.Getenv("SALSA_SKIP_PERMISSIONS_CHECK") == ""
-	rcFiles := []string{
-		userConfig,
-		SalsaRCFile,
-	}
-	for _, rcPath := range rcFiles {
+
+	// Read and unmarshal the config files in cascade.
+	// $PWD/.salsarc overwrites $HOME/.salsarc
+	for _, configFile := range []string{userConfig, ConfigFilename} {
 		if config.Verbose() {
-			fmt.Printf("Reading %v ...\n", rcPath)
+			fmt.Printf("Reading %v ...\n", configFile)
 		}
 
-		if checkPermissions && rcPath != SalsaRCFile {
-			info, err := os.Stat(rcPath)
-			if err != nil {
-				if !os.IsNotExist(err) {
-					log.Fatalf("Error: failed to stat %v: %v", rcPath, err)
-				}
-				continue
-			}
-			if perm := info.Mode() & os.ModePerm & 0007; perm != 0 {
-				log.Fatalf("Error: %v violates the permissions constraints", rcPath)
-			}
-		}
-
-		content, err := ioutil.ReadFile(rcPath)
+		content, err := ioutil.ReadFile(configFile)
 		if err != nil {
 			if !os.IsNotExist(err) {
-				log.Fatalf("Error: failed to read %v: %v", rcPath, err)
+				log.Fatalf("Error: failed to read %v: %v", configFile, err)
 			}
 			continue
 		}
 
 		if err := json.Unmarshal(content, &config.RC); err != nil {
-			log.Fatalf("Error: failed to unmarshal %v: %v", rcPath, err)
+			log.Fatalf("Error: failed to unmarshal %v: %v", configFile, err)
 		}
 	}
 
