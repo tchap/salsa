@@ -130,7 +130,7 @@ func runPublish(cmd *gocli.Command, args []string) {
 		filename)
 
 	if config.Verbose() {
-		fmt.Printf("Executing PUT %v\n", URL)
+		fmt.Printf("PUT %v\n", URL)
 	}
 	if config.Dry() {
 		fmt.Printf("Archive uploaded to\n\n  %v\n\n", URL)
