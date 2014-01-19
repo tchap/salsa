@@ -106,6 +106,52 @@ ENVIRONMENTAL VARIABLES:
 		
 ```
 
+### Nginx as the Artifacts Store
+
+Config for Nginx to act as the artifacts store can look a bit like what follows.
+You might, however, want to tighten the security a but, for example by allowing
+only particular subnets to PUT or GET and so on...
+
+```
+server {
+	listen 80;
+	server artifacts.example.com;
+
+	location / {
+		root /srv/artifacts;
+
+		if ($request_method != GET) {
+			return 405;
+		}
+
+		autoindex on;
+	}
+}
+
+server {
+	listen 443;
+	server artifacts.example.com;
+
+	ssl                 on;
+	ssl_certificate     /etc/nginx/cert/cert.pem;
+	ssl_certificate_key /etc/nginx/cert/cert.key;
+
+	client_max_body_size 10G;
+
+	location / {
+		root /srv/artifacts;
+		
+		auth_basic      "Salsa artifacts store";
+		auth_basic_file /etc/nginx/auth/artifacts.htpasswd;
+
+		dav_methods          PUT;
+		create_full_put_path on;
+
+		autoindex on;
+	}
+}
+```
+
 ## Example
 
 Check the `example` directory for a life demo.
