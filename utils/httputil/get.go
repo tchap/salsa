@@ -5,14 +5,11 @@
 
 package httputil
 
-import (
-	"io"
-	"net/http"
-)
+import "net/http"
 
-func Put(body io.Reader, URL string, cred Credentials) (*http.Response, error) {
+func Get(URL string, cred Credentials) (*http.Response, error) {
 	// Prepare the HTTP request.
-	req, err := http.NewRequest("PUT", URL, body)
+	req, err := http.NewRequest("GET", URL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -24,8 +21,8 @@ func Put(body io.Reader, URL string, cred Credentials) (*http.Response, error) {
 	var client http.Client
 	resp, err := client.Do(req)
 	if err != nil {
+		resp.Body.Close()
 		return nil, err
 	}
-	resp.Body.Close()
 	return resp, nil
 }
