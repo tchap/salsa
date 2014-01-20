@@ -87,5 +87,5 @@ func runGetCrx(cmd *gocli.Command, args []string) {
 		log.Fatalf("Error: %v\n", err)
 	}
 
-	fmt.Printf("Wrote %v bytes to %v\n", n, filename)
+	fmt.Printf("Wrote %v bytes\n", n)
 }
