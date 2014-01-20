@@ -120,6 +120,7 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 	if err != nil {
 		aw.Close()
 		ar.Close()
+		os.Remove(ar.Name())
 		return nil, err
 	}
 
@@ -130,6 +131,7 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 	// Make sure we close the archive writer properly.
 	if err := aw.Close(); err != nil {
 		ar.Close()
+		os.Remove(ar.Name())
 		return nil, err
 	}
 
@@ -137,6 +139,7 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 	// will return no data at all.
 	if _, err := ar.Seek(0, os.SEEK_SET); err != nil {
 		ar.Close()
+		os.Remove(ar.Name())
 		return nil, err
 	}
 
