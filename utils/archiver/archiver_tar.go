@@ -87,7 +87,9 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 			fmt.Println("   ", relative)
 		}
 
-		header.Name = relative
+		// Tar always uses '/' as the separator.
+		header.Name = filepath.ToSlash(relative)
+
 		if archiver.opts.Dry() {
 			header.Size = 0
 		}
