@@ -62,22 +62,11 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 			return err
 		}
 
-		// Skip root.
-		if path == srcDir {
-			return nil
-		}
-
 		if archiver.opts.Verbose() {
 			fmt.Println("   ", path)
 		}
 
-		// Open the artifacts file.
 		relative := path[len(srcDir):]
-		file, err := os.Open(filepath.Join(srcDir, relative))
-		if err != nil {
-			return err
-		}
-		defer file.Close()
 
 		// Prepare tar header.
 		header, err := tar.FileInfoHeader(info, "")
@@ -92,6 +81,18 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 		if err := aw.WriteHeader(header); err != nil {
 			return err
 		}
+
+		// Do not write directories.
+		if info.IsDir() {
+			return nil
+		}
+
+		// Open the artifacts file.
+		file, err := os.Open(filepath.Join(srcDir, relative))
+		if err != nil {
+			return err
+		}
+		defer file.Close()
 
 		// Copy the file into the archive.
 		if !archiver.opts.Dry() {

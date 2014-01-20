@@ -97,7 +97,7 @@ func bootstrap() {
 	// users. Its mode should be set to 0600 since it can containt credentials.
 	if info, err := os.Stat(userConfig); err == nil {
 		if perm := info.Mode() & os.ModePerm & 0077; perm != 0 {
-			fmt.Println("WARNING: %v is accessible by other users")
+			fmt.Printf("WARNING: %v is accessible by other users", userConfig)
 		}
 	} else {
 		if !os.IsNotExist(err) {
