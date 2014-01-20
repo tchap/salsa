@@ -22,15 +22,16 @@ import (
 
 // Subcommand flags.
 var (
-	publishTag      string
-	publishArchiver string = "tar"
+	publishTag         string
+	publishArchiver    string = "tar"
+	publishKeepArchive bool
 )
 
 // Subcommand initialisation and registration.
 func init() {
 	publish := &gocli.Command{
 		UsageLine: `
-  publish [-tag TAG] [-archiver {tar|zip}] ARTIFACTS_DIR`,
+  publish [-tag TAG] [-archiver {tar|zip}] [-keep_archive] ARTIFACTS_DIR`,
 		Short: "publish build artifacts",
 		Long: `
   publish uses ARTIFACTS_DIR as the root directory for the archive that it
@@ -62,6 +63,8 @@ ENVIRONMENTAL VARIABLES:
 		"tag to use in the archive file name")
 	publish.Flags.StringVar(&publishArchiver, "archiver", publishArchiver,
 		"archiver to use for packing the artifacts")
+	publish.Flags.BoolVar(&publishKeepArchive, "keep_archive", publishKeepArchive,
+		"do not delete the temporary archive file")
 
 	getApp().MustRegisterSubcommand(publish)
 }
@@ -101,9 +104,11 @@ func runPublish(cmd *gocli.Command, args []string) {
 
 	var exitError error
 	defer func() {
-		if err := os.Remove(archive.Name()); err != nil {
-			log.Printf("Warning: failed to remove temporary file %v: %v",
-				archive.Name(), err)
+		if !publishKeepArchive {
+			if err := os.Remove(archive.Name()); err != nil {
+				log.Printf("Warning: failed to remove temporary file %v: %v",
+					archive.Name(), err)
+			}
 		}
 		if exitError != nil {
 			log.Fatal(exitError)

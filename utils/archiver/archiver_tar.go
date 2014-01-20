@@ -62,17 +62,32 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 			return err
 		}
 
-		if archiver.opts.Verbose() {
-			fmt.Println("   ", path)
+		relative := path[len(srcDir):]
+
+		// Skip root.
+		if len(relative) == 0 {
+			return nil
 		}
 
-		relative := path[len(srcDir):]
+		// Drop the leading slash.
+		relative = relative[1:]
 
 		// Prepare tar header.
 		header, err := tar.FileInfoHeader(info, "")
 		if err != nil {
 			return err
 		}
+
+		// Append a trailing slash if this is a directory.
+		if info.IsDir() {
+			relative = fmt.Sprintf("%v%c", filepath.Clean(relative), os.PathSeparator)
+		}
+
+		if archiver.opts.Verbose() {
+			fmt.Println("   ", relative)
+		}
+
+		header.Name = relative
 		if archiver.opts.Dry() {
 			header.Size = 0
 		}
@@ -88,7 +103,7 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 		}
 
 		// Open the artifacts file.
-		file, err := os.Open(filepath.Join(srcDir, relative))
+		file, err := os.Open(path)
 		if err != nil {
 			return err
 		}
