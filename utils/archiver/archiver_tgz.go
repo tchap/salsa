@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"unicode/utf8"
 )
 
 type tarArchiver struct {
@@ -70,7 +71,9 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 		}
 
 		// Drop the leading slash.
-		relative = relative[1:]
+		if r, _ := utf8.DecodeRuneInString(relative); r == os.PathSeparator {
+			relative = relative[1:]
+		}
 
 		// Prepare tar header.
 		header, err := tar.FileInfoHeader(info, "")
