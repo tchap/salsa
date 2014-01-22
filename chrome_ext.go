@@ -7,6 +7,7 @@ package main
 
 import (
 	// Stdlib
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -35,13 +36,14 @@ func init() {
 
 	getCrx := &gocli.Command{
 		UsageLine: `
-  get_crx EXTENSION_ID FILENAME`,
+  get_crx [-zip] EXTENSION_ID FILENAME`,
 		Short: "download Chrome extensions from Chrome Web Store",
 		Long: `
   Download the extensions identified by EXTENSION_ID and save it in FILENAME.
 		`,
 		Action: runGetCrx,
 	}
+	getCrx.Flags.BoolVar(&convertCrxToZip, "zip", convertCrxToZip, "convert crx to zip")
 	chromeExt.MustRegisterSubcommand(getCrx)
 
 	genPackageJson := &gocli.Command{
@@ -63,6 +65,8 @@ func init() {
 
 	getApp().MustRegisterSubcommand(chromeExt)
 }
+
+var convertCrxToZip bool
 
 // Subcommand handler.
 func runGetCrx(cmd *gocli.Command, args []string) {
@@ -94,6 +98,57 @@ func runGetCrx(cmd *gocli.Command, args []string) {
 		log.Fatalf("Error: failed to download crx: %v\n", resp.Status)
 	}
 	defer resp.Body.Close()
+
+	// Convert CRX to ZIP if requested.
+	if convertCrxToZip {
+		var (
+			publicKeyLen uint32
+			signatureLen uint32
+		)
+
+		// Drop magic number.
+		if err := binary.Read(resp.Body, binary.LittleEndian, &publicKeyLen); err != nil {
+			log.Fatal(err)
+		}
+		// Drop version.
+		if err := binary.Read(resp.Body, binary.LittleEndian, &publicKeyLen); err != nil {
+			log.Fatal(err)
+		}
+		// Read public key length.
+		if err := binary.Read(resp.Body, binary.LittleEndian, &publicKeyLen); err != nil {
+			log.Fatal(err)
+		}
+		// Read signature length.
+		if err := binary.Read(resp.Body, binary.LittleEndian, &signatureLen); err != nil {
+			log.Fatal(err)
+		}
+
+		var p []byte
+		if publicKeyLen > signatureLen {
+			p = make([]byte, publicKeyLen)
+		} else {
+			p = make([]byte, signatureLen)
+		}
+
+		// Drop the public key.
+		b := p[:publicKeyLen]
+		for i := uint32(0); i != publicKeyLen; {
+			n, err := resp.Body.Read(b[i:])
+			if err != nil {
+				log.Fatal(err)
+			}
+			i += uint32(n)
+		}
+		// Drop the signature.
+		b = p[:signatureLen]
+		for i := uint32(0); i != signatureLen; {
+			n, err := resp.Body.Read(b[i:])
+			if err != nil {
+				log.Fatal(err)
+			}
+			i += uint32(n)
+		}
+	}
 
 	// Write it to the file.
 	file, err := os.OpenFile(filename, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
