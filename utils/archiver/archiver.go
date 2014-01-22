@@ -19,13 +19,13 @@ type Archiver interface {
 type ArchiverType string
 
 const (
-	TarArchiverType ArchiverType = "tar"
+	TgzArchiverType ArchiverType = "tar.gz"
 )
 
 func New(typ ArchiverType, opts Options) (Archiver, error) {
 	switch typ {
-	case TarArchiverType:
-		return newTarArchiver(opts), nil
+	case TgzArchiverType:
+		return newTgzArchiver(opts), nil
 	}
 
 	return nil, ErrUnknownArchiverType

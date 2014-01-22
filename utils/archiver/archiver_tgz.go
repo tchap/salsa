@@ -7,6 +7,7 @@ package archiver
 
 import (
 	"archive/tar"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,15 +16,15 @@ import (
 	"unicode/utf8"
 )
 
-type tarArchiver struct {
+type tgzArchiver struct {
 	opts Options
 }
 
-func newTarArchiver(opts Options) *tarArchiver {
-	return &tarArchiver{opts}
+func newTgzArchiver(opts Options) *tgzArchiver {
+	return &tgzArchiver{opts}
 }
 
-func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error) {
+func (archiver *tgzArchiver) Archive(srcDir string) (archive *os.File, err error) {
 	// Make sure the artifacts source directory exists and is not empty.
 	dir, err := os.Open(srcDir)
 	if err != nil {
@@ -51,11 +52,12 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 		return nil, err
 	}
 
+	gzipWriter := gzip.NewWriter(ar)
+	tarWriter := tar.NewWriter(gzipWriter)
+
 	if archiver.opts.Verbose() {
 		fmt.Println("Packing artifacts")
 	}
-
-	aw := tar.NewWriter(ar)
 
 	err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
 		// Stop on error.
@@ -98,7 +100,7 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 		}
 
 		// Write tar header.
-		if err := aw.WriteHeader(header); err != nil {
+		if err := tarWriter.WriteHeader(header); err != nil {
 			return err
 		}
 
@@ -116,12 +118,13 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 
 		// Copy the file into the archive.
 		if !archiver.opts.Dry() {
-			_, err = io.Copy(aw, file)
+			_, err = io.Copy(tarWriter, file)
 		}
 		return err
 	})
 	if err != nil {
-		aw.Close()
+		tarWriter.Close()
+		gzipWriter.Close()
 		ar.Close()
 		os.Remove(ar.Name())
 		return nil, err
@@ -131,8 +134,16 @@ func (archiver *tarArchiver) Archive(srcDir string) (archive *os.File, err error
 		fmt.Println("Archive created")
 	}
 
-	// Make sure we close the archive writer properly.
-	if err := aw.Close(); err != nil {
+	// Make sure we close tar writer properly.
+	if err := tarWriter.Close(); err != nil {
+		gzipWriter.Close()
+		ar.Close()
+		os.Remove(ar.Name())
+		return nil, err
+	}
+
+	// Make sure we close gzip writer properly.
+	if err := gzipWriter.Close(); err != nil {
 		ar.Close()
 		os.Remove(ar.Name())
 		return nil, err

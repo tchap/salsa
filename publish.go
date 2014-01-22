@@ -23,7 +23,7 @@ import (
 // Subcommand flags.
 var (
 	publishTag         string
-	publishArchiver    string = "tar"
+	publishArchiver    string = "tar.gz"
 	publishKeepArchive bool
 )
 
@@ -31,7 +31,7 @@ var (
 func init() {
 	publish := &gocli.Command{
 		UsageLine: `
-  publish [-tag TAG] [-archiver {tar|zip}] [-keep_archive] ARTIFACTS_DIR`,
+  publish [-tag TAG] [-archiver {tar.gz|zip}] [-keep_archive] ARTIFACTS_DIR`,
 		Short: "publish build artifacts",
 		Long: `
   publish uses ARTIFACTS_DIR as the root directory for the archive that it
