@@ -34,6 +34,22 @@ func init() {
 		Short: "manipulate Chrome Web Store extensions",
 	}
 
+	getName := &gocli.Command{
+		UsageLine: `
+  get_name MANIFEST_FILE`,
+		Short:  "get name string from a manifest file",
+		Action: getNameFromManifest,
+	}
+	chromeExt.MustRegisterSubcommand(getName)
+
+	getVersion := &gocli.Command{
+		UsageLine: `
+  get_version MANIFEST_FILE`,
+		Short:  "get version string from a manifest file",
+		Action: getVersionFromManifest,
+	}
+	chromeExt.MustRegisterSubcommand(getVersion)
+
 	getCrx := &gocli.Command{
 		UsageLine: `
   get_crx [-zip] EXTENSION_ID FILENAME`,
@@ -209,4 +225,51 @@ func runGenPackageJson(cmd *gocli.Command, args []string) {
 	}
 
 	fmt.Println("package.json created")
+}
+
+func getNameFromManifest(cmd *gocli.Command, args []string) {
+	if len(args) != 1 {
+		cmd.Usage()
+		os.Exit(2)
+	}
+
+	manifest, err := loadManifest(args[0])
+	if err != nil {
+		log.Fatalf("Error: %v\n", err)
+	}
+
+	fmt.Print(manifest.Name)
+}
+
+func getVersionFromManifest(cmd *gocli.Command, args []string) {
+	if len(args) != 1 {
+		cmd.Usage()
+		os.Exit(2)
+	}
+
+	manifest, err := loadManifest(args[0])
+	if err != nil {
+		log.Fatalf("Error: %v\n", err)
+	}
+
+	fmt.Print(manifest.Version)
+}
+
+type manifest struct {
+	Name    string
+	Version string
+}
+
+func loadManifest(filename string) (*manifest, error) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	var m manifest
+	if err := json.Unmarshal(content, &m); err != nil {
+		return nil, err
+	}
+
+	return &m, nil
 }
