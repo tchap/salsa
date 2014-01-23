@@ -31,12 +31,12 @@ func init() {
 
 	genBhoversionRc := &gocli.Command{
 		UsageLine: `
-  gen_bhoversion_rc [-manifest MANIFEST_FILE]`,
+  gen_bhoversion_rc [-manifest MANIFEST_FILE] [FILE]`,
 		Short: "generate bhoversion.rc",
 		Long: `
-  gen_brhoversion_rc generates bhoversion.rc in the current working directory.
-  It can optionally read a Chrome extension manifest.json to get the extension
-  version.
+  gen_brhoversion_rc generates bhoversion.rc in the current working directory
+  unless FILE is specified. It can optionally read a Chrome extension
+  manifest.json to get the extension version.
 
   This subcommand uses environmental variables to fill the bhoversion.rc template.
   The required environmental variables are:
@@ -60,9 +60,16 @@ var manifestJson string
 
 // Subcommand handler.
 func runGenBhoversionRc(cmd *gocli.Command, args []string) {
-	if len(args) != 0 {
+	if len(args) > 1 {
 		cmd.Usage()
 		os.Exit(2)
+	}
+
+	var filename string
+	if len(args) == 1 {
+		filename = args[0]
+	} else {
+		filename = "bhoversion.rc"
 	}
 
 	var version string
@@ -131,7 +138,7 @@ func runGenBhoversionRc(cmd *gocli.Command, args []string) {
 
 	t := template.Must(template.New("bhoversion.rc").Parse(bhoversionRcTemplate))
 
-	file, err := os.OpenFile("bhoversion.rc", os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatalf("Error: %v\n", err)
 	}
