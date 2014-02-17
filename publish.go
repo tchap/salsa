@@ -84,8 +84,6 @@ func runPublish(cmd *gocli.Command, args []string) {
 	branch := os.Getenv("BRANCH")
 	if branch == "" {
 		branch = "unknown"
-	} else {
-		branch = strings.Replace(branch, "/", "", -1)
 	}
 	if buildNum := os.Getenv("BUILD_NUMBER"); buildNum != "" {
 		config.Package.Version += "." + buildNum
@@ -123,7 +121,7 @@ func runPublish(cmd *gocli.Command, args []string) {
 		"%v%v-%v-%v.%v",
 		config.Package.Name,
 		publishTag,
-		branch,
+		strings.Replace(branch, "/", "", -1),
 		config.Package.Version,
 		publishArchiver)
 	URL := fmt.Sprintf(
