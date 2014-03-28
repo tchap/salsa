@@ -207,6 +207,8 @@ func runGenPackageJson(cmd *gocli.Command, args []string) {
 		log.Fatalf("Error: failed to unmarshal manifest.json: %v", err)
 	}
 
+	packageJson.Name = strings.ToLower(packageJson.Name)
+	packageJson.Name = strings.Replace(packageJson.Name, " ", "-", -1)
 	packageJson.Dependencies = packageJsonDeps.M
 
 	content, err = json.MarshalIndent(packageJson, "", "  ")
