@@ -8,6 +8,7 @@ package httputil
 import (
 	"io"
 	"net/http"
+	"os"
 )
 
 func Put(body io.Reader, URL string, cred Credentials) (*http.Response, error) {
@@ -18,6 +19,17 @@ func Put(body io.Reader, URL string, cred Credentials) (*http.Response, error) {
 	}
 	if cred != nil {
 		req.SetBasicAuth(cred.Username(), cred.Password())
+	}
+
+	// Try to set Content-Length in some more special cases.
+	switch v := body.(type) {
+	case *os.File:
+		info, err := v.Stat()
+		if err != nil {
+			return nil, err
+		}
+
+		req.ContentLength = info.Size()
 	}
 
 	// Send the request.
