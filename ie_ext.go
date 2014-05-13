@@ -157,6 +157,38 @@ const bhoversionRcTemplate = `
 1 VERSIONINFO
 FILEVERSION {{.VersionCommas}}
 PRODUCTVERSION {{.VersionCommas}}
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0x0L
+FILEOS 0x4L
+FILETYPE 0x2L
+FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "{{.CompanyName}}"
+            VALUE "FileDescription", "{{.FileDescription}}"
+            VALUE "FileVersion", "{{.Version}}"
+            VALUE "InternalName", "ancho.dll"
+            VALUE "LegalCopyright", "{{.LegalCopyright}}"
+            VALUE "OriginalFilename", "ancho.dll"
+            VALUE "ProductName", "{{.ProductName}}"
+            VALUE "ProductVersion", "{{.Version}}"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+`
+
+/*
+const bhoversionRcTemplate = `
+1 VERSIONINFO
+FILEVERSION {{.VersionCommas}}
+PRODUCTVERSION {{.VersionCommas}}
 FILEOS 0x4
 FILETYPE 0x2
 {
@@ -181,3 +213,4 @@ BLOCK "VarFileInfo"
 }
 }
 `
+*/
