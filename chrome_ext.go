@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	// Salsa
@@ -56,6 +57,8 @@ func init() {
 		Short: "download Chrome extensions from Chrome Web Store",
 		Long: `
   Download the extensions identified by EXTENSION_ID and save it in FILENAME.
+  In case EXTENSION_ID is actually a URL, the address is used to retrieve the
+  package directly.
 		`,
 		Action: runGetCrx,
 	}
@@ -96,17 +99,22 @@ func runGetCrx(cmd *gocli.Command, args []string) {
 		filename = args[1]
 	)
 
-	URL := strings.Replace(crxURLTemplate, "~~~~", id, 1)
+	var packageURL string
+	if regexp.MustCompile("^https?://").MatchString(id) {
+		packageURL = id
+	} else {
+		packageURL = strings.Replace(crxURLTemplate, "~~~~", id, 1)
+	}
 
 	if config.Verbose() {
-		fmt.Println("GET", URL)
+		fmt.Println("GET", packageURL)
 	}
 	if config.Dry() {
 		return
 	}
 
 	// Download CRX.
-	resp, err := httputil.Get(URL, nil)
+	resp, err := httputil.Get(packageURL, nil)
 	if err != nil {
 		log.Fatalf("Error: failed to download crx: %v\n", err)
 	}
