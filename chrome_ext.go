@@ -23,6 +23,7 @@ import (
 
 	// Others
 	"github.com/tchap/gocli"
+	"gopkg.in/yaml.v1"
 )
 
 const crxURLTemplate = "https://clients2.google.com/service/update2/crx?response=redirect&x=id%3D~~~~%26uc"
@@ -208,10 +209,10 @@ func runGenPackageJson(cmd *gocli.Command, args []string) {
 	var packageJson struct {
 		Name         string            `json:"name"`
 		Version      string            `json:"version"`
-		Dependencies map[string]string `json:"dependencies"`
+		Dependencies map[string]string `json:"dependencies`
 	}
 
-	if err := json.Unmarshal(content, &packageJson); err != nil {
+	if err := yaml.Unmarshal(content, &packageJson); err != nil {
 		log.Fatalf("Error: failed to unmarshal manifest.json: %v", err)
 	}
 
@@ -277,7 +278,7 @@ func loadManifest(filename string) (*manifest, error) {
 	}
 
 	var m manifest
-	if err := json.Unmarshal(content, &m); err != nil {
+	if err := yaml.Unmarshal(content, &m); err != nil {
 		return nil, err
 	}
 
