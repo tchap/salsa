@@ -7,7 +7,6 @@ package main
 
 import (
 	// Stdlib
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -19,6 +18,7 @@ import (
 	// Others
 	"github.com/dmotylev/nutrition"
 	"github.com/tchap/gocli"
+	"gopkg.in/yaml.v1"
 )
 
 // Subcommand initialisation and registration.
@@ -83,7 +83,7 @@ func runGenBhoversionRc(cmd *gocli.Command, args []string) {
 			log.Fatalf("Error: %v\n", err)
 		}
 
-		if err := json.Unmarshal(content, &manifest); err != nil {
+		if err := yaml.Unmarshal(content, &manifest); err != nil {
 			log.Fatalf("Error: %v\n", err)
 		}
 
