@@ -209,7 +209,7 @@ func runGenPackageJson(cmd *gocli.Command, args []string) {
 	var packageJson struct {
 		Name         string            `json:"name"`
 		Version      string            `json:"version"`
-		Dependencies map[string]string `json:"dependencies`
+		Dependencies map[string]string `json:"dependencies"`
 	}
 
 	if err := yaml.Unmarshal(content, &packageJson); err != nil {
