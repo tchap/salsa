@@ -52,16 +52,14 @@ func init() {
 
 	getCrx := &gocli.Command{
 		UsageLine: `
-  get_crx [-zip] [-url=URL] [EXTENSION_ID] FILENAME`,
+  get_crx [-zip] EXTENSION_ID FILENAME`,
 		Short: "download Chrome extensions from Chrome Web Store",
 		Long: `
   Download the extensions identified by EXTENSION_ID and save it in FILENAME.
-  The -url flag can be used to download the package from arbitrary location.
 		`,
 		Action: runGetCrx,
 	}
 	getCrx.Flags.BoolVar(&convertCrxToZip, "zip", convertCrxToZip, "convert crx to zip")
-	getCrx.Flags.StringVar(&crxURL, "url", crxURL, "CRX package URL")
 	chromeExt.MustRegisterSubcommand(getCrx)
 
 	genPackageJson := &gocli.Command{
@@ -84,43 +82,31 @@ func init() {
 	getApp().MustRegisterSubcommand(chromeExt)
 }
 
-var (
-	convertCrxToZip bool
-	crxURL          string
-)
+var convertCrxToZip bool
 
 // Subcommand handler.
 func runGetCrx(cmd *gocli.Command, args []string) {
-	var (
-		id       string
-		filename string
-	)
-	if len(args) == 2 {
-		id = args[0]
-		filename = args[1]
-	} else if len(args) == 1 && crxURL != "" {
-		filename = args[0]
-	} else {
+	if len(args) != 2 {
 		cmd.Usage()
 		os.Exit(2)
 	}
 
-	var packageURL string
-	if crxURL != "" {
-		packageURL = crxURL
-	} else {
-		packageURL = strings.Replace(crxURLTemplate, "~~~~", id, 1)
-	}
+	var (
+		id       = args[0]
+		filename = args[1]
+	)
+
+	URL := strings.Replace(crxURLTemplate, "~~~~", id, 1)
 
 	if config.Verbose() {
-		fmt.Println("GET", packageURL)
+		fmt.Println("GET", URL)
 	}
 	if config.Dry() {
 		return
 	}
 
 	// Download CRX.
-	resp, err := httputil.Get(packageURL, nil)
+	resp, err := httputil.Get(URL, nil)
 	if err != nil {
 		log.Fatalf("Error: failed to download crx: %v\n", err)
 	}
