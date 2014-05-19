@@ -123,11 +123,17 @@ func runGenBhoversionRc(cmd *gocli.Command, args []string) {
 	// In case this is a.b.c-d
 	ctx.Version = strings.Replace(ctx.Version, "-", ".", 1)
 
-	if strings.Count(ctx.Version, ".") != 3 {
-		buildNum := os.Getenv("BUILD_NUMBER")
-		if buildNum == "" {
-			buildNum = "0"
-		}
+	buildNum := os.Getenv("BUILD_NUMBER")
+	if buildNum == "" {
+		buildNum = "0"
+	}
+
+	// In case we already have a.b.c.d, we make a.b.c.db out of it where
+	// b is the build number. That is the only way that can be used inside
+	// of that IE crap I guess...
+	if strings.Count(ctx.Version, ".") == 3 {
+		ctx.Version += buildNum
+	} else {
 		ctx.Version = fmt.Sprintf("%v.%v", ctx.Version, buildNum)
 	}
 
