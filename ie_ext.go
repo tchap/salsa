@@ -131,7 +131,7 @@ func runGenBhoversionRc(cmd *gocli.Command, args []string) {
 		ctx.Version = fmt.Sprintf("%v.%v", ctx.Version, buildNum)
 	}
 
-	matched, err := regexp.Match("[0-9]+([.][0-9]){3}", []byte(ctx.Version))
+	matched, err := regexp.Match("[0-9]+([.][0-9]+){3}", []byte(ctx.Version))
 	if err != nil {
 		panic(err)
 	}
