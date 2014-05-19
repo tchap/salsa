@@ -107,6 +107,9 @@ func runGenBhoversionRc(cmd *gocli.Command, args []string) {
 		ctx.Version = version
 	}
 
+	toPackageJsonVersion(&ctx.Version)
+	ctx.Version = strings.Replace(ctx.Version, "-", ".", 1)
+
 	switch {
 	case ctx.CompanyName == "":
 		log.Fatalln("Error: BHRC_COMPANYNAME not set")
@@ -120,11 +123,13 @@ func runGenBhoversionRc(cmd *gocli.Command, args []string) {
 		log.Fatalln("Error: BHRC_PRODUCTNAME not set")
 	}
 
-	buildNum := os.Getenv("BUILD_NUMBER")
-	if buildNum == "" {
-		buildNum = "0"
+	if strings.Count(ctx.Version, ".") != 3 {
+		buildNum := os.Getenv("BUILD_NUMBER")
+		if buildNum == "" {
+			buildNum = "0"
+		}
+		ctx.Version = fmt.Sprintf("%v.%v", ctx.Version, buildNum)
 	}
-	ctx.Version = fmt.Sprintf("%v.%v", ctx.Version, buildNum)
 
 	matched, err := regexp.Match("[0-9]+([.][0-9]){3}", []byte(ctx.Version))
 	if err != nil {
