@@ -224,6 +224,12 @@ func runGenPackageJson(cmd *gocli.Command, args []string) {
 		packageJson.Version += ".0.0"
 	case 1:
 		packageJson.Version += ".0"
+	case 2:
+	case 3:
+		i := strings.LastIndex(packageJson.Version, ".")
+		packageJson.Version = packageJson.Version[:i] + "-" + packageJson.Version[i+1:]
+	default:
+		panic("invalid version string: " + packageJson.Version)
 	}
 
 	content, err = json.MarshalIndent(packageJson, "", "  ")
