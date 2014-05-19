@@ -264,6 +264,7 @@ func getVersionFromManifest(cmd *gocli.Command, args []string) {
 		log.Fatalf("Error: %v\n", err)
 	}
 
+	toPackageJsonVersion(&manifest.Version)
 	fmt.Print(manifest.Version)
 }
 
